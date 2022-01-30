@@ -10,10 +10,10 @@ class Server:
         #    一个用来存放所有Loss值的buffer
         pass
 
-    def recv_agent(self):
+    def recv(self, agent, loss):  # 从agent那收到一个loss
         pass
 
-    def send_agent(self):
+    def send(self):
         pass
 
     def update_critic(self):
