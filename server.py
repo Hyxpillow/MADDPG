@@ -1,17 +1,15 @@
-class Server:
-    # 具有的方法包括：
-    #    构造函数
-    #    从agent接受Loss值
-    #    对所有agent的Loss值做平均，然后更新critic网络
-    #    把新的critic网络参数反馈给每个agent
-    def __init__(self):
-        # 拥有的成员变量包括:
-        #    一个critic网络
-        #    一个用来存放所有Loss值的buffer
-        pass
+from networks import CriticNetwork
 
-    def recv(self, agent, loss):  # 从agent那收到一个loss
-        pass
+
+class Server:
+    def __init__(self, num_of_agents, actor_dims, critic_dims):
+        # 拥有的成员变量包括:
+        self.critic_network = CriticNetwork(actor_dims, critic_dims)
+        self.loss_buffer = [0] * num_of_agents
+        #  一个用来存放所有Loss值的buffer
+
+    def recv(self, agent_index, loss):  # 从agent那收到一个loss
+        self.loss_buffer[agent_index] = loss
 
     def send(self):
         pass
