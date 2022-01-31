@@ -6,6 +6,7 @@ import gym
 # 计算loss需要用
 ########################
 import torch
+import torch.nn.functional as F
 ########################*/
 
 
@@ -46,7 +47,7 @@ for episode in range(M):
             action_ = agent_i.target_actor(state_)
             y_ = reward + GAMMA * agent_i.target_critic(state_, action_)
             y = agent_i.critic(state, action)
-            server.recv(i, (y - y_)**2)
+            server.recv(i, (y, y_))
 
             actor_loss = agent_i.critic(state, action)
             actor_loss = -torch.mean(actor_loss)

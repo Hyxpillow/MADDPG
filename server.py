@@ -17,9 +17,8 @@ class Server:
         return critic_state_dict
 
     def update_critic(self):
-        average_loss = torch.mean(torch.tensor(self.loss_buffer, dtype=torch.float))
         self.critic_network.optimizer.zero_grad()
-        average_loss.backward(retain_graph=True)
+        self.loss_buffer[0].backward(retain_graph=True)
         self.critic_network.optimizer.step()
 
 
