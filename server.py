@@ -1,5 +1,5 @@
 from networks import CriticNetwork
-
+import torch
 
 class Server:
     def __init__(self, num_of_agents, actor_dims, critic_dims):
@@ -12,8 +12,15 @@ class Server:
         self.loss_buffer[agent_index] = loss
 
     def send(self):
-        pass
+        critic_params = self.critic_network.named_parameters()
+        critic_state_dict = dict(critic_params)
+        return critic_state_dict
 
     def update_critic(self):
-        pass
+        average_loss = torch.mean(torch.tensor(self.loss_buffer, dtype=torch.float))
+        self.critic_network.optimizer.zero_grad()
+        average_loss.backward(retain_graph=True)
+        self.critic_network.optimizer.step()
+
+
 

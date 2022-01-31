@@ -10,29 +10,23 @@ class Agent:
         self.target_actor_network = ActorNetwork(actor_dims, critic_dims)
         self.target_critic_network = CriticNetwork(actor_dims, critic_dims)
         self.memory = Memory()
-        self.update_network_parameters(tau=1)       
 
     def actor(self, state):  # 根据状态state，给出一个确定的action
-        state = T.tensor([state], dtype=T.double).to(self.actor_network.device)
         action = self.actor_network.forward(state)
         return action
 
     def target_actor(self, state):  # 根据状态state，给出一个确定的action
-        state = T.tensor([state], dtype=T.double).to(self.actor_network.device)
         action = self.target_actor_network.forward(state)
         return action
 
     def critic(self, state, action):  # 在状态state下，给action打分，
-        state = T.tensor([state], dtype=T.double).to(self.actor_network.device)
         val = self.critic_network.forward(state, action)
         return val
 
     def target_critic(self, state, action):  # 在状态state下，给action打分
-        state = T.tensor([state], dtype=T.double).to(self.actor_network.device)
         val = self.target_critic_network.forward(state, action)
         return val
 
-    # 注释修改了  更新actor网络 -> 更新target_actor网络
     def update_target_actor(self, TAU):  # 更新target_actor网络
         target_actor_params = self.target_actor_network.named_parameters()
         actor_params = self.actor_network.named_parameters()

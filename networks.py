@@ -11,6 +11,8 @@ class ActorNetwork(nn.Module):
         self.out = nn.Linear(30, a_dim)
         self.out.weight.data.normal_(0, 0.1)  # initilizaiton of OUT
 
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=0.01)
+
     def forward(self, x):
         x = self.fc1(x)
         x = F.relu(x)
@@ -29,6 +31,7 @@ class CriticNetwork(nn.Module):
         self.fca.weight.data.normal_(0, 0.1)
         self.out = nn.Linear(30, 1)
         self.out.weight.data.normal_(0, 0.1)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=0.01)
 
     def forward(self, s, a):
         x = self.fcs(s)
