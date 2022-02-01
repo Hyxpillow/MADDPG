@@ -1,5 +1,7 @@
 from networks import CriticNetwork
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 class Server:
     def __init__(self, num_of_agents, actor_dims, critic_dims):
@@ -8,8 +10,8 @@ class Server:
         self.loss_buffer = [0] * num_of_agents
         #  一个用来存放所有Loss值的buffer
 
-    def recv(self, agent_index, loss):  # 从agent那收到一个loss
-        self.loss_buffer[agent_index] = loss
+    def recv(self, agent_index, y, y_):  # 从agent那收到一个loss
+        self.loss_buffer[agent_index] = (y, y_)
 
     def send(self):
         critic_params = self.critic_network.named_parameters()
@@ -17,8 +19,11 @@ class Server:
         return critic_state_dict
 
     def update_critic(self):
+        y = torch.tensor(self.loss_buffer[0][0], requires_grad=True, dtype=torch.float)
+        y_ = torch.tensor(self.loss_buffer[0][1], requires_grad=True, dtype=torch.float)
+        loss = F.mse_loss(y, y_)
         self.critic_network.optimizer.zero_grad()
-        self.loss_buffer[0].backward(retain_graph=True)
+        loss.backward(retain_graph=True)
         self.critic_network.optimizer.step()
 
 

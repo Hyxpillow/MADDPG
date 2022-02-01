@@ -1,5 +1,5 @@
 import random
-
+import copy
 
 class Memory:
     def __init__(self, size=10000):

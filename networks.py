@@ -18,8 +18,8 @@ class ActorNetwork(nn.Module):
         x = F.relu(x)
         x = self.out(x)
         x = torch.tanh(x)
-        actions = x * 2  # for the game "Pendulum-v0", action range is [-2, 2]
-        return actions
+        action = x * 2  # for the game "Pendulum-v0", action range is [-2, 2]
+        return action
 
 
 class CriticNetwork(nn.Module):
