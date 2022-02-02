@@ -19,11 +19,9 @@ class Server:
         return critic_state_dict
 
     def update_critic(self):
-        y = torch.tensor(self.loss_buffer[0][0], requires_grad=True, dtype=torch.float)
-        y_ = torch.tensor(self.loss_buffer[0][1], requires_grad=True, dtype=torch.float)
-        loss = F.mse_loss(y, y_)
+        loss = F.mse_loss(self.loss_buffer[0][0], self.loss_buffer[0][1])
         self.critic_network.optimizer.zero_grad()
-        loss.backward(retain_graph=True)
+        loss.backward()
         self.critic_network.optimizer.step()
 
 

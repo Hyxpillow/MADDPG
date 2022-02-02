@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from networks import ActorNetwork, CriticNetwork
 from memory import Memory
 
@@ -12,33 +13,38 @@ class Agent:
         self.memory = Memory()
 
     def actor(self, state):  # 根据状态state，给出一个确定的action
-        state = torch.tensor(state, dtype=torch.float)
         action = self.actor_network.forward(state)
-        return action.detach().numpy()
+        return action
 
     def target_actor(self, state):  # 根据状态state，给出一个确定的action
-        state = torch.tensor(state, dtype=torch.float)
         action = self.target_actor_network.forward(state)
-        return action.detach().numpy()
+        return action
 
     def critic(self, state, action):  # 在状态state下，给action打分，
-        state = torch.tensor(state, dtype=torch.float)
-        action = torch.tensor(action, dtype=torch.float)
         val = self.critic_network.forward(state, action)
-        return val.detach().numpy()
+        return val
 
     def target_critic(self, state, action):  # 在状态state下，给action打分
-        state = torch.tensor(state, dtype=torch.float)
-        action = torch.tensor(action, dtype=torch.float)
         val = self.target_critic_network.forward(state, action)
-        return val.detach().numpy()
+        return val
 
     def update_actor(self, loss):
-        loss = torch.tensor(loss, requires_grad=True, dtype=torch.float)
         actor_loss = -torch.mean(loss)
         self.actor_network.optimizer.zero_grad()
-        actor_loss.backward(retain_graph=True)
+        actor_loss.backward()
         self.actor_network.optimizer.step()
+
+    def update_critic(self, y, y_):  # 实际不会用到这个方法，写出来是为了测试
+        td_error = F.mse_loss(y_, y)
+        self.critic_network.optimizer.zero_grad()
+        td_error.backward()
+        self.critic_network.optimizer.step()
+
+        # print(dict(self.critic_network.named_parameters()))
+
+        critic_params = self.critic_network.named_parameters()
+        critic_state_dict = dict(critic_params)
+        return critic_state_dict
 
     def update_target_actor(self, TAU):  # 更新target_actor网络
         target_actor_params = self.target_actor_network.named_parameters()
