@@ -38,7 +38,7 @@ for episode in range(M):
 # 增加1.10特性，统一梯度清0
 ############################################################
         for i, agent_i in enumerate(agent_list):
-            agent_i.actor.optimizer.zero_grad()
+            agent_i.actor_network.optimizer.zero_grad()
 ############################################################*/
 
         for i, agent_i in enumerate(agent_list):
@@ -51,7 +51,7 @@ for episode in range(M):
 # pytorch1.10里面要先统一清0梯度，再运行，再统一step
 # 而且不确定传入actor_loss行不行，因为actor_loss好像不是一个值
 ############################################################
-            actor_loss = agent_i.critic.forward(state, action)
+            actor_loss = agent_i.critic(state, action)
             actor_loss = -torch.mean(actor_loss)
             actor_loss.backward(retain_graph=True)
 
@@ -63,7 +63,7 @@ for episode in range(M):
 # 增加1.10特性，统一step
 ############################################################
         for i, agent_i in enumerate(agent_list):
-            agent_i.actor.optimizer.step()
+            agent_i.actor_network.optimizer.step()
 ############################################################*/
 
         server.update_critic()
