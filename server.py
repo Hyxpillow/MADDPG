@@ -12,6 +12,7 @@ class Server:
 
      # 从agent那收到网络模型参数
     def recv(self, agent_index, y): 
+        y = dict(y)
         self.model_buffer[agent_index] = y
 
     # 返回模型平均值
@@ -25,16 +26,15 @@ class Server:
     # 更新critic网络
     def update_critic(self, theta):  
         self.set_critic_parameter(theta)
-    
     # 取agent模型参数的平均值
     def average(self):
-
         critic_params = self.critic_network.named_parameters()
         theta = dict(critic_params)
-        for name in theta:
-            theta[name] = 0
-        for state_dict in self.model_buffer:
-            for name in state_dict:
-                theta[name] += state_dict[name]
-        theta /= self.num_of_agents
+        weight_keys=list(self.model_buffer[0].keys())
+        for key in weight_keys:
+            key_sum=0
+            for i in range(self.num_of_agents):
+                key_sum = key_sum + self.model_buffer[i][key]
+            theta[key]=key_sum / self.num_of_agents
         return theta
+

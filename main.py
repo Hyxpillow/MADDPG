@@ -9,7 +9,7 @@ import torch
 
 env = gym.make('Pendulum-v0')
 M = 1000
-MAX_EPISODE_LENGTH = 2000
+MAX_EPISODE_LENGTH = 200
 N = 1
 GAMMA = 0.9
 TAU = 0.01
