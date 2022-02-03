@@ -13,10 +13,7 @@ MAX_EPISODE_LENGTH = 2000
 N = 1
 GAMMA = 0.9
 TAU = 0.01
-<<<<<<< HEAD
-=======
 RENDER = False
->>>>>>> fffa034c7ea150a385f43e955006ba8d12cdc09b
 STATE_DIMENSION = env.observation_space.shape[0]
 ACTION_DIMENSION = env.action_space.shape[0]
 
@@ -37,43 +34,6 @@ for episode in range(M):
     torch.autograd.Variable
     state = env.reset()
     state_list = [state] * N
-<<<<<<< HEAD
-    env.render()
-    
-    for step in range(MAX_EPISODE_LENGTH):
-        for i, agent_i in enumerate(agent_list):
-            action = agent_i.actor(state_list[i])
-            action = np.clip(np.random.normal(action, var), a_low_bound, a_bound)
-            state_, reward, done, info = env.step(action)
-            agent_i.store(state_list[i], action, reward, state_)
-            state_list[i] = state_
-        var *= 0.9995 # decay the exploration controller factor
-        for i, agent_i in enumerate(agent_list):
-            state, action, reward, state_ = agent_i.sample()
-            
-            action_ = agent_i.target_actor(state_)
-            y_ = reward + GAMMA * agent_i.target_critic(state_, action_)
-            y = agent_i.critic(state, action)
-            
-            #server.recv(i, y, y_)
-            #server.update_critic()
-
-
-
-
-            y = torch.tensor(y, requires_grad=True, dtype=torch.float)
-            y_ = torch.tensor(y_, requires_grad=True, dtype=torch.float)
-            loss = F.mse_loss(y_, y)
-            server.critic_network.optimizer.zero_grad()
-            loss.backward()
-            optimizer = torch.optim.Adam(server.critic_network.parameters(), lr=0.001)
-            #server.critic_network.optimizer.step()
-            optimizer.step()
-            #theta = server.send()
-            #if step  3:
-                #print(theta)
-
-=======
     total_reward = 0
     for step in range(MAX_EPISODE_LENGTH):
         if RENDER:
@@ -112,32 +72,16 @@ for episode in range(M):
 
             theta = agent_i.get_critic_parameter()  # 把本地的critic网络参数传给server进行平均计算
             server.recv(i, theta)
->>>>>>> fffa034c7ea150a385f43e955006ba8d12cdc09b
 
             action = agent_i.actor(state)  # 本地更新actor
             loss = agent_i.critic(state, action)
             agent_i.update_actor(loss)
 
-<<<<<<< HEAD
-            
-            theta = server.send()
-            if step > 3:
-                print(theta)
-            
-
-        theta = server.send()
-
-        for agent_i in agent_list:
-            if cnt > 0:
-                print(theta)
-            cnt -= 1
-=======
-        server.update_critic()  # for循环结束，说明server已经收到了所有agent的critic参数，开始进行平均
+       # server.update_critic()  # for循环结束，说明server已经收到了所有agent的critic参数，开始进行平均
         theta = server.send()  # server返回计算好的平均参数
         # print(theta)
 
         for agent_i in agent_list:  # 更新target_actor和target_critic
->>>>>>> fffa034c7ea150a385f43e955006ba8d12cdc09b
             agent_i.set_critic_parameter(theta)
             agent_i.update_target_actor(TAU)
             agent_i.update_target_critic(TAU)
