@@ -2,6 +2,8 @@ from networks import CriticNetwork
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from collections import OrderedDict
+
 
 class Server:
     def __init__(self, num_of_agents, actor_dims, critic_dims):
@@ -30,11 +32,12 @@ class Server:
     def average(self):
         critic_params = self.critic_network.named_parameters()
         theta = dict(critic_params)
+        theta=OrderedDict()
         weight_keys=list(self.model_buffer[0].keys())
         for key in weight_keys:
             key_sum=0
             for i in range(self.num_of_agents):
                 key_sum = key_sum + self.model_buffer[i][key]
-            theta[key]=key_sum / self.num_of_agents
+            theta[key] = key_sum / self.num_of_agents
         return theta
 

@@ -2,15 +2,16 @@ from agent import Agent
 from server import Server
 import gym
 import torch
-
+import numpy as np
 
 # 在执行MADDPG算法之前进行相关变量的初始化
 
-
+use_cuda = torch.cuda.is_available()
+device   = torch.device("cuda" if use_cuda else "cpu")
 env = gym.make('Pendulum-v0')
-M = 1000
+M = 10000
 MAX_EPISODE_LENGTH = 200
-N = 1
+N = 2
 GAMMA = 0.9
 TAU = 0.01
 RENDER = False
@@ -42,21 +43,23 @@ for episode in range(M):
             state = torch.FloatTensor(state_list[i])
             action = agent_i.actor(state)
             action = action.detach()
+            action = np.clip(np.random.normal(action, var), a_low_bound, a_bound)
 
             state_, reward, done, info = env.step(action)
             agent_i.store(state_list[i], action, reward, state_)
             state_list[i] = state_
 
             total_reward += reward
-
         if step == MAX_EPISODE_LENGTH - 1:  # 这个if用于输出提示和控制是否渲染动画
             print('Episode: ', episode, ' Reward: %i' % total_reward)
-            if total_reward > -300:
-                RENDER = True
-
+            # if total_reward > -300:
+            #     RENDER = True
         if agent_list[0].memory.current_size < 10000:  # memory没装满时不学习，直接continue
             continue
 
+
+
+        var *= 0.9995
         for i, agent_i in enumerate(agent_list):  # 开始学习
             state, action, reward, state_ = agent_i.sample()  # 存在buffer里的都是numpy
 
