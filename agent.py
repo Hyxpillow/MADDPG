@@ -40,8 +40,6 @@ class Agent:
         td_error.backward()
         self.critic_network.optimizer.step()
 
-        # print(dict(self.critic_network.named_parameters()))
-
         critic_params = self.critic_network.named_parameters()
         critic_state_dict = dict(critic_params)
         return critic_state_dict
@@ -66,9 +64,11 @@ class Agent:
                     (1-TAU)*target_critic_state_dict[name].clone()
         self.target_critic_network.load_state_dict(critic_state_dict)
 
+    def get_critic_parameter(self):  # 获取critic网络的参数
+        return self.critic_network.named_parameters()
+
     def set_critic_parameter(self, theta):  # 设置critic网络的参数
         self.critic_network.load_state_dict(theta)
-
 
     def store(self, state, action, reward, state_):  # 把(s, a, r, s_)存入memory
         self.memory.save(state, action, reward, state_)
