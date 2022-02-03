@@ -7,24 +7,29 @@ class Server:
     def __init__(self, num_of_agents, actor_dims, critic_dims):
         # 拥有的成员变量包括:
         self.critic_network = CriticNetwork(actor_dims, critic_dims)
-        self.loss_buffer = [0] * num_of_agents
-        #  一个用来存放所有Loss值的buffer
+        self.model_buffer = [0] * num_of_agents #  一个用来存放所有模型参数的buffer
+        
 
-    def recv(self, agent_index, y, y_):  # 从agent那收到一个loss
-        self.loss_buffer[agent_index] = (y, y_)
+     # 从agent那收到网络模型参数
+    def recv(self, agent_index, y): 
+        self.model_buffer[agent_index] = y
 
+    # 返回模型平均值
     def send(self):
-        critic_params = self.critic_network.named_parameters()
-        critic_state_dict = dict(critic_params)
-        return critic_state_dict
-
-    def update_critic(self):
-        y = torch.tensor(self.loss_buffer[0][0], requires_grad=True, dtype=torch.float)
-        y_ = torch.tensor(self.loss_buffer[0][1], requires_grad=True, dtype=torch.float)
-        loss = F.mse_loss(y, y_)
-        self.critic_network.optimizer.zero_grad()
-        loss.backward(retain_graph=True)
-        self.critic_network.optimizer.step()
-
-
-
+        return self.average()
+    
+    # 设置critic网络的参数
+    def set_critic_parameter(self, theta):  
+        self.critic_network.load_state_dict(theta)
+    
+    # 更新critic网络
+    def update_critic(self, theta):  
+        self.set_critic_parameter(theta)
+    
+    # 取agent模型参数的平均值
+    def average(self):
+        theta = [0]
+        for i in self.model_buffer:
+            theta += i
+        theta /= self.num_of_agents
+        return theta

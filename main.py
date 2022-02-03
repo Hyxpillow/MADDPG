@@ -42,7 +42,6 @@ for episode in range(M):
     env.render()
     
     for step in range(MAX_EPISODE_LENGTH):
-        
         for i, agent_i in enumerate(agent_list):
             action = agent_i.actor(state_list[i])
             action = np.clip(np.random.normal(action, var), a_low_bound, a_bound)
