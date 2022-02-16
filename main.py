@@ -3,51 +3,77 @@ from server import Server
 import gym
 import torch
 import numpy as np
-
+from Env import Env 
 # 在执行MADDPG算法之前进行相关变量的初始化
 
 use_cuda = torch.cuda.is_available()
 device   = torch.device("cuda" if use_cuda else "cpu")
-env = gym.make('Pendulum-v0')
+
+client_dim = 5
+edge_dim = 3
+env = Env(client_dim, edge_dim)
+
+
 M = 10000
 MAX_EPISODE_LENGTH = 200
-N = 2
+N = client_dim
 GAMMA = 0.9
 TAU = 0.01
 RENDER = False
-STATE_DIMENSION = env.observation_space.shape[0]
-ACTION_DIMENSION = env.action_space.shape[0]
+STATE_DIMENSION = env.client_dim
 
-state_list = [0 for i in range(N)]
+
+ACTION_DIMENSION = 1
+
+# 修改
+# state_list = [0 for i in range(N)]    #记录每个agent的上一个状态
+
+
 agent_list = [Agent(STATE_DIMENSION, ACTION_DIMENSION) for i in range(N)]
 server = Server(N, STATE_DIMENSION, ACTION_DIMENSION)
 
 
 
 
-
-a_bound = env.action_space.high
-a_low_bound = env.action_space.low
+# 待定
+# a_bound = env.action_space.high
+# a_low_bound = env.action_space.low
 var = 3
 # 真正开始执行MADDPG
 cnt = 3
 for episode in range(M):
-    torch.autograd.Variable
+    #torch.autograd.Variable
     state = env.reset()
-    state_list = [state] * N
+
+    # 修改
+    # state_list = [state] * N
+
+
     total_reward = 0
     for step in range(MAX_EPISODE_LENGTH):
-        if RENDER:
-            env.render()
+        #if RENDER:
+            #env.render()
         for i, agent_i in enumerate(agent_list):  # 这个for循环与环境交互，产生新的(s,a,r,s_)并存入memory
-            state = torch.FloatTensor(state_list[i])
-            action = agent_i.actor(state)
-            action = action.detach()
-            action = np.clip(np.random.normal(action, var), a_low_bound, a_bound)
 
-            state_, reward, done, info = env.step(action)
-            agent_i.store(state_list[i], action, reward, state_)
-            state_list[i] = state_
+            state = env.state(i)
+            state = torch.FloatTensor(state)
+
+            
+            action = agent_i.actor(state)
+            #action = action.detach()
+            action = [int(action)]
+
+            
+            #action = np.clip(np.random.normal(action, var), a_low_bound, a_bound)
+
+            # 修改
+            # state_, reward, done, info = env.step(action)
+            # agent_i.store(state_list[i], action, reward, state_)
+            # state_list[i] = state_
+            
+            state_, reward = env.step(action, i)
+            agent_i.store(state, action, reward, state_)
+
 
             total_reward += reward
         if step == MAX_EPISODE_LENGTH - 1:  # 这个if用于输出提示和控制是否渲染动画
